@@ -1,0 +1,2 @@
+npm i bcryptjs body-parser concurrently express is-empty jsonwebtoken mongoose passport passport-jwt validator
+check out video as well
