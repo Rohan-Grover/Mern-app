@@ -7,7 +7,7 @@ const app = express();
 const PORT = 4000;
 const userRoutes = express.Router();
 
-let Vendor = require('./models/vendor');
+let User = require('./models/user');
 let Item = require('./models/item');
 let Order = require('./models/order');
 
@@ -25,75 +25,46 @@ connection.once('open', function() {
 
 // Getting all the users
 userRoutes.route('/').get(function(req, res) {
-    Item.find(function(err, items) {
+    User.find(function(err, users) {
         if (err) {
             console.log(err);
         } else {
-            res.json(items);
+            res.json(users);
         }
     });
 });
 
+
+// Adding a new user
+userRoutes.route('/adduser').post(function(req, res) {
+    let user = new User(req.body);
+    user.save()
+        .then(user => {
+            res.status(200).json({'User': 'User added successfully'});
+        })
+        .catch(err => {
+            res.status(400).send('Error');
+        });
+});
+
 userRoutes.route('/login').post(function(req, res) {
-    Vendor.findOne({'username': req.body.username})
-        .then(vendor => {
-            if (vendor){
-            res.status(200).json({'Item': 'Item added successfully'});
+    User.findOne({'username': req.body.username})
+        .then(user => {
+            if(user){
+                if(user.password == req.body.password)
+                    res.status(200).json({'User': 'User Exists'});
+                else
+                    res.status(200).json({'User': 'Wrong Password'});
+                    
             }
             else
-                res.status(200).json({'Item': 'Item failed'});
-
+                res.status(200).json({'User': 'User Does Not Exist'});
         })
         .catch(err => {
             res.status(400).send('Error');
         });
 });
 
-// Adding a new user            res.status(200).json({'Item': 'Item added successfully'});
-
-userRoutes.route('/additem').post(function(req, res) {
-    let item = new Item(req.body);
-    item.save()
-        .then(item => {
-            res.status(200).json({'Item': 'Item added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('Error');
-        });
-});
-
-
-userRoutes.route('/addvendor').post(function(req, res) {
-    let vendor = new Vendor(req.body);
-    vendor.save()
-        .then(vendor => {
-            res.status(200).json({'Vendor': 'Vendor added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('Error');
-        });
-});
-
-userRoutes.route('/addorder').post(function(req, res) {
-    let order = new Order(req.body);
-    order.save()
-        .then(order => {
-            res.status(200).json({'Order': 'Order added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('Error');
-        });
-});
-
-
-
-// // Getting a user by id
-// userRoutes.route('/:id').get(function(req, res) {
-//     let id = req.params.id;
-//     User.findById(id, function(err, user) {
-//         res.json(user);
-//     });
-// });
 
 app.use('/', userRoutes);
 
